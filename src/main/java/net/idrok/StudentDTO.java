@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-
+// salom dunyo
 @Data
 public class StudentDTO {
     private Integer id;
