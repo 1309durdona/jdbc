@@ -1,13 +1,16 @@
 package net.idrok;
 
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
-// salom dunyo
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentDTO {
     private Integer id;
     private String name;
@@ -15,37 +18,9 @@ public class StudentDTO {
     private LocalDateTime createdDate;
 
 
-    public StudentDTO() {
-        // Default constructor
-    }
-
-    public StudentDTO(String name, String userName, LocalDateTime createdDate) {
-
+    public StudentDTO(String name, String userName, LocalDateTime now) {
         this.name = name;
         this.userName = userName;
-        this.createdDate = createdDate;
+        this.createdDate = now;
     }
-
-    @Override
-    public String toString() {
-        return "StudentDTO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", userName='" + userName + '\'' +
-                ", createdDate=" + createdDate +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        StudentDTO that = (StudentDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(userName, that.userName) && Objects.equals(createdDate, that.createdDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, userName, createdDate);
-    }
-
 }

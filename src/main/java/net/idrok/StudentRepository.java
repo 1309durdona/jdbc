@@ -1,6 +1,5 @@
 package net.idrok;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -15,34 +14,57 @@ public class StudentRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List getAllStudents(){
-        String sql = "SELECT * FROM student";
-        List studentList = jdbcTemplate.query(sql, new BeanPropertyRowMapper(StudentDTO.class));
-        return studentList;
+    // Barcha o'quvchilarni olish
+    public List<StudentDTO> getAllStudents() {
+        String sql = "SELECT * FROM student ORDER BY id";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(StudentDTO.class));
     }
 
     public void save(StudentDTO dto) {
-        String sql = "INSERT INTO student (name,user_name,created_date) values('%s','%s','%s')";
-        sql = String.format(sql, dto.getName(), dto.getUserName(), dto.getCreatedDate());
-        jdbcTemplate.update(sql);
+        String sql = "INSERT INTO student (name, user_name, created_date) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, dto.getName(), dto.getUserName(), dto.getCreatedDate());
     }
 
-    public void deleteId(Integer id){
-        String sql = "DELETE FROM student WHERE id = %d";
-        sql = String.format(sql, id);
-        jdbcTemplate.update(sql);
+    public void deleteId(Integer id) {
+        String sql = "DELETE FROM student WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     public StudentDTO getById(Integer id) {
-        String sql = "SELECT * FROM student WHERE id = %d";
-        sql = String.format(sql, id);
-        StudentDTO dto = null;
+        String sql = "SELECT * FROM student WHERE id = ?";
         try {
-            dto = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(StudentDTO.class));
-
+            return jdbcTemplate.queryForObject(sql,
+                    new BeanPropertyRowMapper<>(StudentDTO.class), id);
         } catch (EmptyResultDataAccessException e) {
-            e.printStackTrace();
+            return null;
         }
-        return dto;
+    }
+
+    // Yangi metod: O'quvchini yangilash
+    public void update(StudentDTO dto) {
+        String sql = "UPDATE student SET name = ?, user_name = ? WHERE id = ?";
+        jdbcTemplate.update(sql, dto.getName(), dto.getUserName(), dto.getId());
+    }
+
+    // Yangi metod: Username bo'yicha qidirish
+    public List<StudentDTO> findByUsername(String username) {
+        String sql = "SELECT * FROM student WHERE user_name ILIKE ? ORDER BY id";
+        return jdbcTemplate.query(sql,
+                new BeanPropertyRowMapper<>(StudentDTO.class),
+                "%" + username + "%");
+    }
+
+    // Yangi metod: Sahifalash (pagination)
+    public List<StudentDTO> getStudentsWithPagination(int page, int size) {
+        String sql = "SELECT * FROM student ORDER BY id LIMIT ? OFFSET ?";
+        int offset = (page - 1) * size;
+        return jdbcTemplate.query(sql,
+                new BeanPropertyRowMapper<>(StudentDTO.class), size, offset);
+    }
+
+    // Yangi metod: Umumiy sonni olish
+    public int getTotalCount() {
+        String sql = "SELECT COUNT(*) FROM student";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 }
